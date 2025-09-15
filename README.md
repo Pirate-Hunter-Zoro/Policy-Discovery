@@ -1,86 +1,154 @@
-# Assignment 1  
+# Policy Discovery – Reinforcement Learning Assignment
 
-**Out:** Jan 10  
-**Due:** Jan 21 (11:59 pm)  
-**Total:** 10 points  
+This repository contains implementations and experiments for a reinforcement learning assignment covering **Dynamic Programming**, **Tabular RL**, and **Deep Q-Learning**.
 
 ---
 
-## Part I — Value Iteration, Policy Iteration, Modified Policy Iteration (4 points)
-
-In this part, you will implement **value iteration**, **policy iteration**, and **modified policy iteration** for Markov Decision Processes (MDPs) in Python.
-
-- Fill in the functions in the skeleton code `MDP.py`.  
-- Use `TestMDP.py` to verify correctness (contains the simple MDP example from Lecture 2a, Slides 13–14).  
-- Run with:  
+## Project Structure
 
 ```bash
-python TestMDP.py
+Policy-Discovery/
+├── mdp/                # Part 1 – MDP algorithms
+│   ├── MDP.py
+│   ├── TestMDP.py
+│   ├── TestMDPMaze.py
+│   └── __init__.py
+├── rl/                 # Part 2 – Tabular RL (Q-learning)
+│   ├── RL.py
+│   ├── TestRL.py
+│   ├── TestRLMaze.py
+│   └── __init__.py
+├── dqn/                # Part 3 – Deep Q-Networks
+│   ├── DQN.py
+│   ├── utils/
+│   │   ├── buffers.py
+│   │   ├── common.py
+│   │   ├── envs.py
+│   │   ├── seed.py
+│   │   └── torch.py
+│   └── __init__.py
+├── requirements.txt
+└── README.md
+```
 
- • Add print statements to check that outputs make sense.
+---
 
-Provided files:
- • Skeleton code: MDP.py
- • Simple MDP for testing: TestMDP.py
+## Installation
 
-Submission requirements:
- 1. Submit your Python code.
- 2. Test your code with the maze problem (TestMDPmaze.py).
- 3. Report results:
- • Value Iteration: Policy, value function, and number of iterations with tolerance = 0.01, starting from all-zero value function. [1 point]
- • Policy Iteration: Policy, value function, and number of iterations when starting with a policy that chooses action 0 in all states. [1 point]
- • Modified Policy Iteration: Number of iterations required for convergence when partial policy evaluation runs from 1 to 10 iterations, with tolerance = 0.01, initial all-zero value function and policy choosing action 0 everywhere. Discuss the impact compared to value iteration and policy iteration. [2 points]
+Clone this repository and create a virtual environment:
 
-⸻
+```bash
+git clone <your-repo>
+cd Policy-Discovery
+conda create -n rl python=3.10
+conda activate rl
+```
 
-Part II — Q-Learning (3 points)
+Install dependencies:
 
-In this part, you will implement the Q-learning algorithm in Python.
- • Fill in the functions in the skeleton code RL.py.
- • RL.py requires MDP.py from Part I, so keep them in the same directory.
- • Use TestRL.py to test your functions.
- • Run with:
+```bash
+pip install -r requirements.txt
+```
 
-python TestRL.py
+Dependencies include:
 
-Provided files:
- • Skeleton code: RL.py
- • Simple RL test: TestRL.py
+- numpy
+- matplotlib
+- tqdm
+- torch
+- gymnasium (drop-in replacement for gym)
 
-Submission requirements:
- 1. Submit your Python code.
- 2. Test your code with the maze problem (TestRLmaze.py).
- 3. Report results:
- • Produce a graph:
- • x-axis: Episode # (0–200)
- • y-axis: Average (100 trials) of cumulative discounted rewards per episode (100 steps).
- • Curves: ε = 0.05, 0.1, 0.3, 0.5. [1 point]
- • Initial state = 0, Q-function initialized to 0 for all state-action pairs.
- • Explain the impact of ε on training rewards, Q-values, and resulting policy. [2 points]
+---
 
-⸻
+## Part 1 – Markov Decision Processes
 
-Part III — Deep Q-Network (3 points)
+**File:** `mdp/MDP.py`  
+Implements classical planning algorithms:
 
-In this part, you will train a Deep Q-Network (DQN) to solve the CartPole problem from OpenAI Gym. Since the problem has continuous states, use a neural network for the Q-function.
+- Value Iteration
+- Policy Iteration
+- Modified Policy Iteration
+- Policy Evaluation (exact and partial)
+- Policy Extraction
 
-Setup steps:
- 1. Read about the CartPole problem in OpenAI Gym.
- 2. Install PyTorch and complete a basic tutorial.
- 3. Use the provided code (Part 3) to train a DQN on CartPole.
+**Tests:**
 
-Submission requirements:
- 1. Target Network Experiments:
- • Modify the code to produce a graph:
- • x-axis: Episodes (up to 300)
- • y-axis: Average cumulative reward of last 25 episodes.
- • Curves: Update target network every 1, 10 (default), 50, 100 episodes.
- • Average results over 5 runs (different seeds). [1 point]
- • Explain the impact of the target network and relate it to value iteration. [1 point]
- 2. Replay Buffer Experiments:
- • Modify the code to produce a graph:
- • x-axis: Episodes (up to 300)
- • y-axis: Average cumulative reward of last 25 episodes.
- • Curves: Mini-batch sizes of 1, 10 (default), 50, 100.
- • Average results over 5 runs (different seeds). [1 point]
- • Explain the impact of the replay buffer and relate it to exact gradient descent. [1 point]
+- `TestMDP.py` – runs algorithms on a toy 4-state MDP (Lecture 2a, slides 13–14).
+- `TestMDPMaze.py` – larger gridworld with goal/bad states and absorbing end state.
+
+**Run:**
+
+```bash
+python -m mdp.TestMDP
+python -m mdp.TestMDPMaze
+```
+
+---
+
+## Part 2 – Tabular RL (Q-Learning)
+
+**File:** `rl/RL.py`  
+Implements model-free RL:
+
+- Q-Learning with:
+  - ε-greedy exploration
+  - Boltzmann/softmax exploration
+- Reward/state sampling via `sampleRewardAndNextState`.
+
+**Tests:**
+
+- `TestRL.py` – sanity check Q-Learning on a toy MDP.
+- `TestRLMaze.py` – Q-Learning in the maze domain with varying ε values.
+
+**Run:**
+
+```bash
+python -m rl.TestRL
+python -m rl.TestRLMaze
+```
+
+---
+
+## Part 3 – Deep Q-Learning
+
+**File:** `dqn/DQN.py`  
+Implements a Deep Q-Network agent trained on CartPole-v1.
+
+Key features:
+
+- Replay buffer (experience replay)
+- Target network updates
+- ε-greedy exploration with annealing
+- Torch MLP for Q(s,a)
+
+**Utilities (`dqn/utils/`):**
+
+- `envs.py` – episode play loops (with Gymnasium API)
+- `buffers.py` – replay buffer
+- `seed.py` – reproducibility helpers
+- `torch.py` – Torch helper functions
+
+**Run training:**
+
+```bash
+python -m dqn.DQN
+```
+
+This trains DQN across multiple random seeds and plots the average reward curve.
+
+---
+
+## Results
+
+- Part 1: All DP algorithms converge to consistent value functions and policies on the toy MDP and maze.  
+- Part 2: Q-Learning learns effective policies under different exploration rates (ε).  
+- Part 3: DQN achieves stable CartPole balancing performance, with reward curves approaching the 200-step cap.
+
+---
+
+## Notes
+
+- Gym has been replaced by Gymnasium; ensure environments are created with the updated API.
+- Rendering requires `render_mode="human"` when calling `gym.make`.
+- Reward sampling in Part 2 is stochastic (e.g., Gaussian), so policies may vary across runs.
+- For reproducibility, set seeds via `utils/seed`.
