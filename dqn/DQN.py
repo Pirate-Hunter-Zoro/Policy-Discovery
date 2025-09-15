@@ -1,6 +1,9 @@
-import gym
+import gymnasium as gym
 import numpy as np
-import utils.envs, utils.seed, utils.buffers, utils.torch, utils.common
+from .utils.envs import * 
+from .utils.seed import *
+from .utils.buffers import *
+from .utils.torch import *
 import torch
 import tqdm
 import matplotlib.pyplot as plt
@@ -13,7 +16,7 @@ warnings.filterwarnings("ignore")
 
 # Constants
 SEEDS = [1,2,3,4,5]
-t = utils.torch.TorchHelper()
+t = TorchHelper()
 DEVICE = t.device
 OBS_N = 4               # State space size
 ACT_N = 2               # Action space size
@@ -40,14 +43,19 @@ Q = None
 # Create network for Q(s, a)
 # Create target network
 # Create optimizer
-def create_everything(seed):
-
-    utils.seed.seed(seed)
-    env = gym.make("CartPole-v0")
-    env.seed(seed)
-    test_env = gym.make("CartPole-v0")
-    test_env.seed(10+seed)
-    buf = utils.buffers.ReplayBuffer(BUFSIZE)
+def create_everything(some_seed):
+    
+    env = gym.make("CartPole-v1")
+    env.action_space.seed(some_seed)
+    env.observation_space.seed(some_seed)
+    env.reset(seed=some_seed)
+    
+    test_env = gym.make("CartPole-v1")
+    test_env.action_space.seed(10+some_seed)
+    test_env.observation_space.seed(10+some_seed)
+    test_env.reset(seed=10+some_seed)
+    
+    buf = ReplayBuffer(BUFSIZE)
     Q = torch.nn.Sequential(
         torch.nn.Linear(OBS_N, HIDDEN), torch.nn.ReLU(),
         torch.nn.Linear(HIDDEN, HIDDEN), torch.nn.ReLU(),
@@ -58,6 +66,10 @@ def create_everything(seed):
         torch.nn.Linear(HIDDEN, HIDDEN), torch.nn.ReLU(),
         torch.nn.Linear(HIDDEN, ACT_N)
     ).to(DEVICE)
+    
+    # Copy weights once at start
+    update(Qt, Q)
+    
     OPT = torch.optim.Adam(Q.parameters(), lr = LEARNING_RATE)
     return env, test_env, buf, Q, Qt, OPT
 
@@ -71,6 +83,7 @@ def policy(env, obs):
 
     global EPSILON, Q
 
+    obs = _unwrap_obs(obs)
     obs = t.f(obs).view(-1, OBS_N)  # Convert to torch tensor
     
     # With probability EPSILON, choose a random action
@@ -88,6 +101,13 @@ def policy(env, obs):
 
     return action
 
+def greedy_policy(env, obs):
+    obs = _unwrap_obs(obs)
+    obs = t.f(obs).view(-1, OBS_N)
+    # Now we can see its q-values for various actions since it's in the right shape to plug in
+    with torch.no_grad():
+        qvalues = Q(obs)
+    return torch.argmax(qvalues).item()
 
 # Update networks
 def update_networks(epi, buf, Q, Qt, OPT):
@@ -95,6 +115,7 @@ def update_networks(epi, buf, Q, Qt, OPT):
     # Sample a minibatch (s, a, r, s', d)
     # Each variable is a vector of corresponding values
     S, A, R, S2, D = buf.sample(MINIBATCH_SIZE, t)
+    D = D.float()
     
     # Get Q(s, a) for every (s, a) in the minibatch
     qvalues = Q(S).gather(1, A.view(-1, 1)).squeeze()
@@ -123,6 +144,15 @@ def update_networks(epi, buf, Q, Qt, OPT):
 
     return loss.item()
 
+def _unwrap_obs(o):
+    if isinstance(o, tuple) and len(o) > 1: # (obs, info)
+        o = o[0]
+    if isinstance(o, dict):
+        for k in ("observation", "obs", "state"):
+            if k in o:
+                o = o[k]
+    return np.asarray(o, dtype=np.float32)
+
 # Play episodes
 # Training function
 def train(seed):
@@ -143,7 +173,7 @@ def train(seed):
     for epi in pbar:
 
         # Play an episode and log episodic reward
-        S, A, R = utils.envs.play_episode_rb(env, policy, buf)
+        S, A, R = play_episode_rb(env, policy, buf)
         
         # Train after collecting sufficient experience
         if epi >= TRAIN_AFTER_EPISODES:
@@ -155,7 +185,7 @@ def train(seed):
         # Evaluate for TEST_EPISODES number of episodes
         Rews = []
         for epj in range(TEST_EPISODES):
-            S, A, R = utils.envs.play_episode(test_env, policy, render = False)
+            S, A, R = play_episode(test_env, greedy_policy, render = False)
             Rews += [sum(R)]
         testRs += [sum(Rews)/TEST_EPISODES]
 
@@ -188,4 +218,4 @@ if __name__ == "__main__":
     # Plot the curve for the given seeds
     plot_arrays(curves, 'b', 'dqn')
     plt.legend(loc='best')
-    plt.show()
+    plt.savefig('dqn_cartpole.png', dpi=150, bbox_inches="tight")

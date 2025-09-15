@@ -1,4 +1,4 @@
-from MDP import *
+from .MDP import *
 
 ''' Construct simple MDP as described in Lecture 2a Slides 13-14'''
 # Transition function: |A| x |S| x |S'| array
@@ -16,16 +16,33 @@ print("Value Iteration Results:")
 print(V)
 print(nIterations)
 print(epsilon)
+print("-------------------------------")
+
 policy = mdp.extractPolicy(V)
 V = mdp.evaluatePolicy(policy)
 print("Policy Extraction and Evaluation Results:")
 print(policy)
 print(V)
 print("-------------------------------")
+
 [policy,V,iterId] = mdp.policyIteration(np.array([0,0,0,0]))
 print("Policy Iteration Results:")
 print(policy)
 print(V)
 print(iterId)
-[V,iterId,epsilon] = mdp.evaluatePolicyPartially(np.array([1,0,1,0]),np.array([0,10,0,13]))
-[policy,V,iterId,tolerance] = mdp.modifiedPolicyIteration(np.array([1,0,1,0]),np.array([0,10,0,13]))
+print("-------------------------------")
+
+[V,iterId,epsilon] = mdp.evaluatePolicyPartially(policy,np.array([0,0,0,0]), nIterations=1)
+print("Partial Policy Evaluation Results:")
+print(V)
+print(iterId)
+print(epsilon)
+print("-------------------------------")
+
+[policy,V,iterId,outer_epsilon] = mdp.modifiedPolicyIteration(np.array([1,0,1,0]),np.array([0,10,0,13]), nIterations=1)
+print("Modified Policy Iteration Results:")
+print(policy)
+print(V)
+print(iterId)
+print(outer_epsilon)
+print("-------------------------------")

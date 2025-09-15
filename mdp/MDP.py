@@ -177,11 +177,32 @@ class MDP:
 
         # temporary values to ensure that the code compiles until this
         # function is coded
-        V = np.zeros(self.nStates)
+        policy = np.array(policy, dtype=int)
+        assert policy.shape == (self.nStates,), "Invalid policy: it has dimensionality " + repr(policy.shape) + ", but it should be (nStates,)"
+        for a in policy:
+            assert 0 <= a < self.nActions, "Invalid action in policy: " + repr(a) + ", but it should be in [0,nActions-1]"
+     
+        R_policy = self.R[policy, np.arange(self.nStates)] # Get the reward for each state according to the policy - shape (n_states,)
+        assert R_policy.shape == (self.nStates,), "Invalid reward vector for policy: it has dimensionality " + repr(R_policy.shape) + ", but it should be (nStates,)"
+        P_policy = self.T[policy, np.arange(self.nStates), :] # Get the transition probabilities for each state according to the policy - shape (n_states, n_states)
+        assert P_policy.shape == (self.nStates, self.nStates), "Invalid transition matrix for policy: it has dimensionality " + repr(P_policy.shape) + ", but it should be (nStates,nStates)"
+        assert np.allclose(P_policy.sum(1), 1.0, rtol=0.0, atol=1e-10), \
+           "Invalid transition probabilities for policy: some row sums = " + repr(P_policy.sum(1))  
+        
+        assert initialV.shape == (self.nStates,), "Invalid initial value function: it has dimensionality " + repr(initialV.shape) + ", but it should be (nStates,)"
+        V = initialV.copy()
         iterId = 0
-        epsilon = 0
+        epsilon = np.inf
+        while iterId < nIterations:
+            V_old = V.astype(float, copy=True)
+            V_new_policy = R_policy + self.discount * np.dot(P_policy, V_old)
+            epsilon = np.linalg.norm(V_new_policy - V_old, np.inf)
+            V = V_new_policy
+            iterId += 1
+            if nIterations == np.inf and epsilon <= tolerance: # our only stopping criterion is tolerance
+                break
 
-        return [V,iterId,epsilon]
+        return (V,iterId,epsilon.item())
 
     def modifiedPolicyIteration(self,initialPolicy,initialV,nEvalIterations=5,nIterations=np.inf,tolerance=0.01):
         '''Modified policy iteration procedure: alternate between
@@ -206,10 +227,27 @@ class MDP:
 
         # temporary values to ensure that the code compiles until this
         # function is coded
-        policy = np.zeros(self.nStates)
-        V = np.zeros(self.nStates)
+        policy = initialPolicy.copy()
+        policy = np.array(policy, dtype=int)
+        assert policy.shape == (self.nStates,), "Invalid policy: it has dimensionality " + repr(policy.shape) + ", but it should be (nStates,)"
+        for a in policy:
+            assert 0 <= a < self.nActions, "Invalid action in policy: " + repr(a) + ", but it should be in [0,nActions-1]"
+        
+        V = initialV.copy()
+        assert V.shape == (self.nStates,), "Invalid value function: it has dimensionality " + repr(V.shape) + ", but it should be (nStates,)"
+        
+        outer_epsilon = np.inf
         iterId = 0
-        epsilon = 0
+        while iterId < nIterations:
+            V_old = V.astype(float, copy=True)
+            V = self.evaluatePolicyPartially(policy, V_old, nIterations=nEvalIterations, tolerance=tolerance)[0]
+            new_policy = self.extractPolicy(V)
+            outer_epsilon = np.linalg.norm(V - V_old, np.inf)
+            iterId += 1
+            if outer_epsilon <= tolerance:
+                policy = new_policy
+                break
+            policy = new_policy
 
-        return [policy,V,iterId,epsilon]
+        return [policy,V,iterId,outer_epsilon]
         
