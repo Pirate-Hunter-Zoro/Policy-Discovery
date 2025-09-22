@@ -199,23 +199,3 @@ def train(seed):
     env.close()
 
     return last25testRs
-
-# Plot mean curve and (mean-std, mean+std) curve with some transparency
-# Clip the curves to be between 0, 200
-def plot_arrays(vars, color, label):
-    mean = np.mean(vars, axis=0)
-    std = np.std(vars, axis=0)
-    plt.plot(range(len(mean)), mean, color=color, label=label)
-    plt.fill_between(range(len(mean)), np.maximum(mean-std, 0), np.minimum(mean+std,200), color=color, alpha=0.3)
-
-if __name__ == "__main__":
-
-    # Train for different seeds
-    curves = []
-    for seed in SEEDS:
-        curves += [train(seed)]
-
-    # Plot the curve for the given seeds
-    plot_arrays(curves, 'b', 'dqn')
-    plt.legend(loc='best')
-    plt.savefig('dqn_cartpole.png', dpi=150, bbox_inches="tight")

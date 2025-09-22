@@ -12,7 +12,7 @@ All algorithms use dense transition (`T ∈ ℝ^{|A|×|S|×|S|}`) and reward (`R
 
 ---
 
-## Methods (as required by the assignment)
+## Methods
 
 - **Value Iteration** uses tolerance **0.01** and **V₀ = 0**.
 - **Policy Iteration** starts from **π₀ = 0** (action 0 in all states).
@@ -86,11 +86,11 @@ All algorithms use dense transition (`T ∈ ℝ^{|A|×|S|×|S|}`) and reward (`R
 | 9  | 6  | 0.001308 |
 | 10 | 7  | 0.000001 |
 
-**Observation.** As **K** increases, MPI typically needs **fewer outer iterations**, trending toward PI (finite evaluation to near‑exact). Small non‑monotonicities in ε∞ reflect the different stopping surfaces across K; nonetheless, policies match VI/PI: `[3,3,1,1,1,3,1,1,1,1,1,2,3,3,0,0,0]` and values are numerically consistent.
+**Observation.** As **K** increases, MPI typically needs **fewer outer iterations**, trending toward PI (finite evaluation to near‑exact). Small non‑monotonicities in ε∞ reflect the different stopping surfaces across K; nonetheless, policies match VI/PI: `[3,3,1,1,1,3,1,1,1,1,1,2,3,3,0,0,0]` and values are numerically consistent. Note that as K approcahes infinity, it becomes closer to directly solving for the state values given the policy, and then iterating the policy (which is the definition of PI). And of course when K=1, this is precisely VI.
 
 ---
 
-## Discussion (required)
+## Discussion
 
 - **VI vs PI.** VI applies a max‑Bellman backup each sweep and is a **γ‑contraction**, hence convergence to V\* is guaranteed; it required **21** iterations on the maze with tol=0.01. PI alternates **exact** policy evaluation with greedy improvement; it converged in **5 outer iterations**, yielding the same optimal policy/value up to numerical tolerance.
 - **MPI behavior.** MPI interpolates between VI and PI by using **K** evaluation sweeps before each improvement. For both toy and maze:

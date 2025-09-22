@@ -1,5 +1,4 @@
 import numpy as np
-from mdp.MDP import MDP
 
 class RL:
     def __init__(self,mdp,sampleReward):
