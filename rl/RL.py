@@ -75,8 +75,8 @@ class RL:
                 elif temperature > 0:
                     qcol = Q[:, s]
                     prefs = qcol / temperature
-                    # Now we exponentiate to turn our list of actions from this state into a probability distribution based on reward
-                    prefs -= prefs.max() # For numerical stability since we are exponentiating
+                    # Now exponentiate to turn our list of actions from this state into a probability distribution based on reward
+                    prefs -= prefs.max() # For numerical stability to avoid blowing up when exponentiating
                     probs = np.exp(prefs) / np.sum(np.exp(prefs))
                     u = np.random.rand()
                     cum_probs = np.cumsum(probs)
@@ -94,7 +94,7 @@ class RL:
                 reward, s_next = self.sampleRewardAndNextState(s, a)
                 
                 # Q-learning update
-                td_target = reward + gamma * np.max(Q[:, s_next]) # What we learn from taking this action
+                td_target = reward + gamma * np.max(Q[:, s_next]) # Learned from taking this action
                 Q[a, s] = (1 - alpha)*Q[a, s] + alpha*td_target
                 
                 # Accumulate discounted return

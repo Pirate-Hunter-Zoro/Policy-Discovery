@@ -1,8 +1,8 @@
-# CS885 — Assignment 1, Part III: Deep Q-Learning (CartPole)
+# Deep Q-Learning (CartPole)
 
 ## Setup
 
-We trained Deep Q-Networks (DQN) on **CartPole-v1** (|S|=4, |A|=2, γ=0.99), using:
+Trained Deep Q-Networks (DQN) on **CartPole-v1** (|S|=4, |A|=2, γ=0.99), using:
 
 - Replay buffer size: 10,000  
 - Hidden units: 512, 2-layer ReLU MLP  
@@ -33,7 +33,7 @@ The target network stabilizes bootstrapping. If updated too often (1), it chases
 
 ---
 
-## Results — Minibatch Size
+## Results — Minibatch Size (Using target update frequence of 10 based on previous results)
 
 ![Minibatch sweep](outputs/part3_minibatch_sweep.png)
 

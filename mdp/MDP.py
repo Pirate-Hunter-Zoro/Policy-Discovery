@@ -53,7 +53,7 @@ class MDP:
             for a in range(self.nActions):
                 T_actions = self.T[a] # Give us the probability transition matrix for action a
                 R_actions = self.R[a] # Give us the reward vector for action a from each state
-                V_for_a = R_actions + self.discount * np.dot(T_actions, initialV_for_iter) # Updates the value of all states based on the reward we get from this action plus the weighted average of the values of the next states
+                V_for_a = R_actions + self.discount * np.dot(T_actions, initialV_for_iter) # Updates the value of all states based on the reward achieved from this action plus the weighted average of the values of the next states
                 new_V_for_iter = np.maximum(new_V_for_iter, V_for_a) # Each state gets a chance to improve
 
             new_V = new_V_for_iter
@@ -107,14 +107,14 @@ class MDP:
         I = np.zeros((self.nStates,self.nStates))
         for i in range(self.nStates):
             I[i,i] = 1.0
-        P_pi = np.zeros((self.nStates,self.nStates)) # Transition matrix for the policy - since we KNOW what actions will be taken at each state
+        P_pi = np.zeros((self.nStates,self.nStates)) # Transition matrix for the policy - since it is KNOWN what actions will be taken at each state
         for s in range(self.nStates):
             a = policy[s]
             P_pi[s,:] = self.T[a,s,:]
             assert abs(P_pi[s,:].sum() - 1) < 1e-5, "Invalid transition probabilities for state " + repr(s) + ": they sum to " + repr(P_pi[s,:].sum()) + ", but they should sum to 1"
         print("Transition matrix for policy:\n" + repr(P_pi))
         
-        R_pi = np.zeros(self.nStates) # We know the reward at each state according to the policy because we know what action we will take
+        R_pi = np.zeros(self.nStates) # Know the reward at each state according to the policy because the action that will be taken is known
         for s in range(self.nStates):
             a = policy[s]
             R_pi[s] = self.R[a,s]

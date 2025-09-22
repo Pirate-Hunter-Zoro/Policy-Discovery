@@ -1,8 +1,8 @@
-# CS885 — Assignment 1, Part II: Reinforcement Learning (Q-Learning)
+# Reinforcement Learning (Q-Learning)
 
 ## Setup
 
-We apply Q-learning to two environments:
+Apply Q-learning to two environments:
 
 1. **Toy MDP (|S|=4, |A|=2, γ=0.9)** — sanity check.
 2. **Maze (|S|=17, |A|=4, γ=0.95)** — the slip maze with absorbing end.

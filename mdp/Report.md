@@ -1,5 +1,5 @@
 
-# CS885 — Assignment 1, Part I: Dynamic Programming for MDPs
+# Dynamic Programming for MDPs
 
 ## Overview
 
@@ -16,7 +16,7 @@ All algorithms use dense transition (`T ∈ ℝ^{|A|×|S|×|S|}`) and reward (`R
 
 - **Value Iteration** uses tolerance **0.01** and **V₀ = 0**.
 - **Policy Iteration** starts from **π₀ = 0** (action 0 in all states).
-- **Modified Policy Iteration** sweeps **K ∈ {1,…,10}** partial‑evaluation iterations with **V₀ = 0**, **π₀ = 0**, tolerance **0.01**; we report the **outer** iterations until convergence and the final outer ε∞.
+- **Modified Policy Iteration** sweeps **K ∈ {1,…,10}** partial‑evaluation iterations with **V₀ = 0**, **π₀ = 0**, tolerance **0.01**; report the **outer** iterations until convergence and the final outer ε∞.
 
 ---
 

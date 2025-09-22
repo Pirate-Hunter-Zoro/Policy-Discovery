@@ -104,7 +104,7 @@ def policy(env, obs):
 def greedy_policy(env, obs):
     obs = _unwrap_obs(obs)
     obs = t.f(obs).view(-1, OBS_N)
-    # Now we can see its q-values for various actions since it's in the right shape to plug in
+    # Now can see its q-values for various actions since it's in the right shape to plug in
     with torch.no_grad():
         qvalues = Q(obs)
     return torch.argmax(qvalues).item()

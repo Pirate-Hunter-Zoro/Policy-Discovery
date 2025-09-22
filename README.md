@@ -1,6 +1,7 @@
 # Policy Discovery – Reinforcement Learning Assignment
 
-This repository contains implementations and experiments for a reinforcement learning assignment covering **Dynamic Programming**, **Tabular RL**, and **Deep Q-Learning**.
+This repository contains implementations and experiments for a reinforcement learning assignment, covering **Dynamic Programming (DP)**, **Tabular RL (Q-Learning)**, and **Deep Q-Learning (DQN)**.  
+It is structured into three main parts, each corresponding to a core set of algorithms and experiments.
 
 ---
 
@@ -8,147 +9,120 @@ This repository contains implementations and experiments for a reinforcement lea
 
 ```bash
 Policy-Discovery/
-├── mdp/                # Part 1 – MDP algorithms
+├── mdp/                # Part I – Dynamic Programming for MDPs
 │   ├── MDP.py
 │   ├── TestMDP.py
 │   ├── TestMDPMaze.py
 │   └── __init__.py
-├── rl/                 # Part 2 – Tabular RL (Q-learning)
+├── rl/                 # Part II – Tabular RL (Q-Learning)
 │   ├── RL.py
 │   ├── TestRL.py
 │   ├── TestRLMaze.py
 │   └── __init__.py
-├── dqn/                # Part 3 – Deep Q-Networks
+├── dqn/                # Part III – Deep Q-Learning
 │   ├── DQN.py
-│   ├── utils/
-│   │   ├── buffers.py
-│   │   ├── common.py
-│   │   ├── envs.py
-│   │   ├── seed.py
-│   │   └── torch.py
-│   └── __init__.py
+│   ├── TestDQN.py
+│   ├── outputs/        # Saved plots and CSV logs
+│   └── utils/          # Shared utilities
+│       ├── buffers.py
+│       ├── envs.py
+│       ├── seed.py
+│       ├── torch.py
+│       └── common.py
 ├── requirements.txt
 └── README.md
 ```
 
----
+## Part I – Dynamic Programming for MDPs
 
-## Installation
+### File: mdp/MDP.py
 
-Clone this repository and create a virtual environment:
-
-```bash
-git clone <your-repo>
-cd Policy-Discovery
-conda create -n rl python=3.10
-conda activate rl
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Dependencies include:
-
-- numpy
-- matplotlib
-- tqdm
-- torch
-- gymnasium (drop-in replacement for gym)
-
----
-
-## Part 1 – Markov Decision Processes
-
-**File:** `mdp/MDP.py`  
 Implements classical planning algorithms:
+ • Value Iteration (VI)
+ • Policy Iteration (PI)
+ • Modified Policy Iteration (MPI)
+ • Policy Evaluation (exact and partial)
+ • Policy Extraction
 
-- Value Iteration
-- Policy Iteration
-- Modified Policy Iteration
-- Policy Evaluation (exact and partial)
-- Policy Extraction
+Experiments:
+ • TestMDP.py — toy 4-state MDP (from Lecture 2a, slides 13–14).
+ • TestMDPMaze.py — 4×4 slip maze with goal, bad, and absorbing end state.
 
-**Tests:**
-
-- `TestMDP.py` – runs algorithms on a toy 4-state MDP (Lecture 2a, slides 13–14).
-- `TestMDPMaze.py` – larger gridworld with goal/bad states and absorbing end state.
-
-**Run:**
+Run:
 
 ```bash
 python -m mdp.TestMDP
 python -m mdp.TestMDPMaze
 ```
 
----
+⸻
 
-## Part 2 – Tabular RL (Q-Learning)
+## Part II – Tabular RL (Q-Learning)
 
-**File:** `rl/RL.py`  
-Implements model-free RL:
+### File: rl/RL.py
 
-- Q-Learning with:
-  - ε-greedy exploration
-  - Boltzmann/softmax exploration
-- Reward/state sampling via `sampleRewardAndNextState`.
+Implements model-free Q-Learning with:
+ • ε-greedy exploration
+ • Boltzmann (softmax) exploration
+ • Sampling of rewards and next states
 
-**Tests:**
+Experiments:
+ • TestRL.py — sanity check Q-Learning on the toy MDP.
+ • TestRLMaze.py — Q-Learning in the maze domain with different ε values.
+Produces learning curves (rl_maze_avg_returns.png, CSV logs).
 
-- `TestRL.py` – sanity check Q-Learning on a toy MDP.
-- `TestRLMaze.py` – Q-Learning in the maze domain with varying ε values.
-
-**Run:**
+Run:
 
 ```bash
 python -m rl.TestRL
 python -m rl.TestRLMaze
 ```
 
----
+⸻
 
-## Part 3 – Deep Q-Learning
+## Part III – Deep Q-Learning (DQN)
 
-**File:** `dqn/DQN.py`  
+### File: dqn/DQN.py
+
 Implements a Deep Q-Network agent trained on CartPole-v1.
 
-Key features:
+Features:
+ • Replay buffer (experience replay)
+ • Target network updates
+ • ε-greedy exploration with annealing
+ • Torch MLP (2 hidden layers, 512 units each)
 
-- Replay buffer (experience replay)
-- Target network updates
-- ε-greedy exploration with annealing
-- Torch MLP for Q(s,a)
+Utilities (dqn/utils/):
+ • envs.py — play episodes, handle Gymnasium API
+ • buffers.py — replay buffer implementation
+ • seed.py — reproducibility helpers
+ • torch.py — Torch helper functions
 
-**Utilities (`dqn/utils/`):**
+Experiments:
+ • TestDQN.py — training/evaluation driver for DQN
+ • Sweeps over target update frequency and minibatch size
+ • Saves learning curves (.png) and per-episode averages (.csv) to dqn/outputs/.
 
-- `envs.py` – episode play loops (with Gymnasium API)
-- `buffers.py` – replay buffer
-- `seed.py` – reproducibility helpers
-- `torch.py` – Torch helper functions
-
-**Run training:**
+Run:
 
 ```bash
-python -m dqn.DQN
+python -m dqn.TestDQN
 ```
 
-This trains DQN across multiple random seeds and plots the average reward curve.
+⸻
 
----
+## Results (Summary)
 
-## Results
+ • Part I (DP): VI, PI, and MPI all converge to the same optimal policies and values on both toy MDP and maze.
+ • Part II (Q-Learning): Effective learning with small ε (0.05–0.1); high ε (0.3–0.5) degrades performance.
+ • Part III (DQN): Stable CartPole performance when tuned:
+ • Best with target update ≈ 10 episodes.
+ • Larger minibatches (50–100) yield smoother, faster learning.
 
-- Part 1: All DP algorithms converge to consistent value functions and policies on the toy MDP and maze.  
-- Part 2: Q-Learning learns effective policies under different exploration rates (ε).  
-- Part 3: DQN achieves stable CartPole balancing performance, with reward curves approaching the 200-step cap.
+⸻
 
----
-
-## Notes
-
-- Gym has been replaced by Gymnasium; ensure environments are created with the updated API.
-- Rendering requires `render_mode="human"` when calling `gym.make`.
-- Reward sampling in Part 2 is stochastic (e.g., Gaussian), so policies may vary across runs.
-- For reproducibility, set seeds via `utils/seed`.
+Notes
+ • Uses Gymnasium instead of Gym; for rendering, use render_mode="human" in gym.make().
+ • Reward sampling in Part II can be stochastic, but experiments use deterministic means.
+ • Set seeds via dqn/utils/seed.py for reproducibility.
+ • Plots and logs are written into each part’s outputs/ directory.
