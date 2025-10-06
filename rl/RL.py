@@ -58,7 +58,6 @@ class RL:
         policy = np.zeros(self.mdp.nStates,int)
         gamma = self.mdp.discount
         alpha = 0.1
-        actions = np.arange(self.mdp.nActions)
         
         episode_returns = np.zeros(nEpisodes, dtype=float)
         for ep in range(nEpisodes):
@@ -99,11 +98,12 @@ class RL:
                 
                 # Accumulate discounted return
                 G += gamma_pow * reward
-                episode_returns[ep] = G
                 gamma_pow *= gamma
                 
                 # Advance state
                 s = s_next
+        
+            episode_returns[ep] = G
 
         # Extract final policy from Q - which means being greedy at each state
         for s in range(self.mdp.nStates):
